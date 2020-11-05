@@ -341,6 +341,7 @@ func (n *NodeController) controlLoop(ctx context.Context, providerNode *corev1.N
 			}
 			statusTimer.Reset(n.statusInterval)
 		case <-pingTimer.C:
+			log.G(ctx).Debug(">Starting node ping")
 			if err := n.handlePing(ctx, providerNode); err != nil {
 				log.G(ctx).WithError(err).Error("Error while handling node ping")
 			} else {
@@ -376,7 +377,7 @@ func (n *NodeController) handlePing(ctx context.Context, providerNode *corev1.No
 		err = pkgerrors.Wrap(err, "node ping returned error on ping")
 		return err
 	}
-
+	log.G(ctx).Debug(">Will update status")
 	if n.disableLease {
 		return n.updateStatus(ctx, providerNode, false)
 	}
@@ -611,6 +612,7 @@ func updateNodeStatus(ctx context.Context, nodes v1.NodeInterface, nodeFromProvi
 
 	var updatedNode *corev1.Node
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		log.G(ctx).Debug(">requesting node from api server")
 		apiServerNode, err := nodes.Get(ctx, nodeFromProvider.Name, emptyGetOptions)
 		if err != nil {
 			return err
