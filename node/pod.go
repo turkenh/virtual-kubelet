@@ -320,6 +320,7 @@ func (pc *PodController) enqueuePodStatusUpdate(ctx context.Context, q workqueue
 	kpod := obj.(*knownPod)
 	kpod.Lock()
 	if cmp.Equal(kpod.lastPodStatusReceivedFromProvider, pod) {
+		log.G(ctx).Debugf("skipping pod status update for %d, bacause it is same", pod.Name)
 		kpod.Unlock()
 		return
 	}
